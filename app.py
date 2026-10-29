@@ -1,11 +1,11 @@
 import os
 import pickle
 import numpy as np
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 
 app = Flask(__name__, template_folder='../templates')
 
-# Resolve model path for local development and Vercel serverless environment
+# Resolve model path for Vercel's serverless environment
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'linear.pkl')
 
 model = None
@@ -18,7 +18,7 @@ def home():
     prediction_text = None
     if request.method == 'POST':
         try:
-            # Retrieve features from form
+            # Extract features matching your linear.pkl metadata
             sqft = float(request.form.get('Square_Footage', 0))
             bedrooms = float(request.form.get('Num_Bedrooms', 0))
             bathrooms = float(request.form.get('Num_Bathrooms', 0))
@@ -33,12 +33,12 @@ def home():
                 pred = model.predict(features)[0]
                 prediction_text = f"${pred:,.2f}"
             else:
-                prediction_text = "Model file (linear.pkl) not found."
+                prediction_text = "Error: Model file (linear.pkl) not loaded."
         except Exception as e:
             prediction_text = f"Error processing input: {str(e)}"
 
     return render_template('index.html', prediction=prediction_text)
 
-# Required for Vercel serverless function entrypoint
+# Vercel requires the app instance to be accessible
 if __name__ == '__main__':
     app.run(debug=True)
